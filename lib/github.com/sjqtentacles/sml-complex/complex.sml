@@ -102,15 +102,19 @@ struct
       end
 
   (* `Real.toString` differs between compilers (MLton prints 1.0 as "1",
-     Poly/ML as "1.0"); normalize so output is identical everywhere by
-     ensuring a decimal point on plain integer-valued reals. *)
-  fun fmt x =
+     Poly/ML as "1.0", and they disagree on digit count and exponent style).
+     Emit a forced-decimal representation instead: always a decimal point,
+     a leading "-" (not "~"), and a fixed 6 decimal places, so the output is
+     byte-identical under both MLton and Poly/ML. *)
+  fun fmt r =
     let
-      val s = Real.toString x
-      val plain =
-        CharVector.all (fn c => c <> #"." andalso c <> #"E" andalso c <> #"e") s
+      val s = if Real.signBit r then "-" else ""
+      val a = Real.abs r
+      val scaled = Real.realRound (a * 1000000.0)
+      val whole = Real.floor (scaled / 1000000.0)
+      val frac  = Real.floor scaled - whole * 1000000
     in
-      if plain then s ^ ".0" else s
+      s ^ Int.toString whole ^ "." ^ StringCvt.padLeft #"0" 6 (Int.toString frac)
     end
 
   fun toString ((a, b) : t) =
