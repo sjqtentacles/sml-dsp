@@ -1,0 +1,12 @@
+(* Source files for the sml-dsp library, in dependency order.
+   Vendored deps (sml-complex, then sml-fft) come before our own sources. *)
+
+$(SML_LIB)/basis/basis.mlb
+
+../sml-complex/complex.sig
+../sml-complex/complex.sml
+../sml-fft/fft.sig
+../sml-fft/fft.sml
+
+dsp.sig
+dsp.sml
